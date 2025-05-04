@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Records - Doctor-Patient Management System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background-color: #0d6efd;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .card {
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .record-details {
+            display: none;
+        }
+
+        .record-details.active {
+            display: block;
+        }
+
+        .filters {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">Doctor-Patient Management</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#patient-history-section"
+                            data-section="patient-history-section">Patient History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#dashboard-section" data-section="dashboard-section">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#symptom-analysis-section"
+                            data-section="symptom-analysis-section">Symptom Analysis</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Patient History Section -->
+        <section id="patient-history-section" class="section active">
+            <div class="filters">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <input type="text" class="form-control" id="search-input" placeholder="Search records...">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <select class="form-select" id="disease-filter">
+                            <option value="">All Diseases</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <select class="form-select" id="severity-filter">
+                            <option value="">All Severity Levels</option>
+                            <option value="mild">Mild</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="severe">Severe</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <input type="date" class="form-control" id="date-filter">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button class="btn btn-success" id="export-csv">Export to CSV</button>
+                        <button class="btn btn-danger" id="export-pdf">Export to PDF</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="records-table" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Disease</th>
+                            <th>Visit Date</th>
+                            <th>Severity</th>
+                            <th>Healing Duration</th>
+                            <th>Fees</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="records-body">
+                        <!-- Records will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Record Details Modal -->
+            <div class="modal fade" id="recordModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Patient Record Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Patient Name:</strong> <span id="modal-patient-name"></span></p>
+                                    <p><strong>Contact Info:</strong> <span id="modal-contact-info"></span></p>
+                                    <p><strong>Visit Date:</strong> <span id="modal-visit-date"></span></p>
+                                    <p><strong>Disease:</strong> <span id="modal-disease"></span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Severity:</strong> <span id="modal-severity"></span></p>
+                                    <p><strong>Healing Duration:</strong> <span id="modal-healing-duration"></span></p>
+                                    <p><strong>Fees:</strong> <span id="modal-fees"></span></p>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <p><strong>Symptoms:</strong></p>
+                                    <ul id="modal-symptoms" class="list-group"></ul>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <p><strong>Diagnosis:</strong></p>
+                                    <p id="modal-diagnosis"></p>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <p><strong>Treatment:</strong></p>
+                                    <p id="modal-treatment"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="edit-record">Edit Record</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="section">
+            <h2 class="mb-4">Analytics Dashboard</h2>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <select class="form-select" id="dashboard-disease-filter">
+                        <option value="">Filter by Disease</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="date" class="form-control" id="dashboard-date-filter">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Symptom Frequency</h5>
+                            <canvas id="symptom-frequency-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Disease Trends</h5>
+                            <canvas id="disease-trends-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Healing Duration</h5>
+                            <canvas id="healing-duration-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Visit Frequency</h5>
+                            <canvas id="visit-frequency-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Fees Analysis</h5>
+                            <canvas id="fees-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Symptom Analysis Section -->
+        <section id="symptom-analysis-section" class="section">
+            <h2 class="mb-4">Symptom Pattern Analysis</h2>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="symptoms-input"
+                    placeholder="Enter symptoms separated by commas...">
+            </div>
+            <div id="analysis-result"></div>
+        </section>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let recordsTable;
+        let currentRecordId;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize DataTable
+            recordsTable = $('#records-table').DataTable({
+                pageLength: 10,
+                order: [[2, 'desc']], // Sort by visit date descending
+                columns: [
+                    { data: 'patientName' },
+                    { data: 'disease' },
+                    {
+                        data: 'visitDate',
+                        render: function (data) {
+                            return new Date(data).toLocaleDateString();
+                        }
+                    },
+                    { data: 'severity' },
+                    {
+                        data: 'healingDuration',
+                        render: function (data) {
+                            return data + ' days';
+                        }
+                    },
+                    {
+                        data: 'fees',
+                        render: function (data) {
+                            return '$' + data;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data) {
+                            return `
+                                <button class="btn btn-sm btn-info view-record" data-id="${data.id}">View</button>
+                                <button class="btn btn-sm btn-warning edit-record" data-id="${data.id}">Edit</button>
+                                <button class="btn btn-sm btn-danger delete-record" data-id="${data.id}">Delete</button>
+                            `;
+                        }
+                    }
+                ]
+            });
+
+            // Load records
+            await loadRecords();
+
+            // Event listeners
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                recordsTable.search(e.target.value).draw();
+            });
+
+            document.getElementById('disease-filter').addEventListener('change', (e) => {
+                recordsTable.column(1).search(e.target.value).draw();
+            });
+
+            document.getElementById('severity-filter').addEventListener('change', (e) => {
+                recordsTable.column(3).search(e.target.value).draw();
+            });
+
+            document.getElementById('date-filter').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    recordsTable.column(2).search(e.target.value).draw();
+                } else {
+                    recordsTable.column(2).search('').draw();
+                }
+            });
+
+            document.getElementById('export-csv').addEventListener('click', async () => {
+                const records = await API.getRecords();
+                Utils.exportToCSV(records, 'patient_records.csv');
+            });
+
+            document.getElementById('export-pdf').addEventListener('click', async () => {
+                const records = await API.getRecords();
+                Utils.exportToPDF(records, 'patient_records.pdf');
+            });
+
+            // View record details
+            document.getElementById('records-body').addEventListener('click', async (e) => {
+                if (e.target.classList.contains('view-record')) {
+                    const recordId = e.target.dataset.id;
+                    await showRecordDetails(recordId);
+                } else if (e.target.classList.contains('edit-record')) {
+                    const recordId = e.target.dataset.id;
+                    window.location.href = `index.html#doctor-panel?edit=${recordId}`;
+                } else if (e.target.classList.contains('delete-record')) {
+                    const recordId = e.target.dataset.id;
+                    if (confirm('Are you sure you want to delete this record?')) {
+                        await deleteRecord(recordId);
+                    }
+                }
+            });
+        });
+
+        async function loadRecords() {
+            try {
+                const records = await API.getRecords();
+                recordsTable.clear().rows.add(records).draw();
+
+                // Update disease filter options
+                const diseases = [...new Set(records.map(r => r.disease))];
+                const diseaseFilter = document.getElementById('disease-filter');
+                diseaseFilter.innerHTML = '<option value="">All Diseases</option>';
+                diseases.forEach(disease => {
+                    const option = document.createElement('option');
+                    option.value = disease;
+                    option.textContent = disease;
+                    diseaseFilter.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading records:', error);
+                alert('Error loading records. Please try again.');
+            }
+        }
+
+        async function showRecordDetails(recordId) {
+            try {
+                const records = await API.getRecords();
+                const record = records.find(r => r.id === recordId);
+                if (!record) return;
+
+                // Fill modal with record details
+                document.getElementById('modal-patient-name').textContent = record.patientName;
+                document.getElementById('modal-contact-info').textContent = record.contactInfo;
+                document.getElementById('modal-visit-date').textContent = new Date(record.visitDate).toLocaleDateString();
+                document.getElementById('modal-disease').textContent = record.disease;
+                document.getElementById('modal-severity').textContent = record.severity;
+                document.getElementById('modal-healing-duration').textContent = record.healingDuration + ' days';
+                document.getElementById('modal-fees').textContent = '$' + record.fees;
+                document.getElementById('modal-diagnosis').textContent = record.diagnosis;
+                document.getElementById('modal-treatment').textContent = record.treatment;
+
+                // Update symptoms list
+                const symptomsList = document.getElementById('modal-symptoms');
+                symptomsList.innerHTML = '';
+                record.symptoms.forEach(symptom => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = symptom;
+                    symptomsList.appendChild(li);
+                });
+
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('recordModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error showing record details:', error);
+                alert('Error loading record details. Please try again.');
+            }
+        }
+
+        async function deleteRecord(recordId) {
+            try {
+                await API.deleteRecord(recordId);
+                await loadRecords();
+                alert('Record deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting record:', error);
+                alert('Error deleting record. Please try again.');
+            }
+        }
+
+        // Tab navigation logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.section');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    sections.forEach(s => s.classList.remove('active'));
+                    link.classList.add('active');
+                    const target = link.getAttribute('data-section');
+                    document.getElementById(target).classList.add('active');
+                    if (target === 'dashboard-section') {
+                        renderDashboardCharts();
+                    }
+                });
+            });
+            // Show Patient History by default
+            document.querySelector('.nav-link[data-section="patient-history-section"]').classList.add('active');
+            document.getElementById('patient-history-section').classList.add('active');
+        });
+
+        // Chart.js dashboard implementation
+        let dashboardCharts = {};
+        async function renderDashboardCharts() {
+            const records = await API.getRecords();
+            // Destroy previous charts if they exist
+            Object.values(dashboardCharts).forEach(chart => chart && chart.destroy());
+            dashboardCharts = {};
+
+            // Symptom Frequency
+            const symptomCounts = {};
+            records.forEach(r => (r.symptoms || []).forEach(s => symptomCounts[s] = (symptomCounts[s] || 0) + 1));
+            const symptomLabels = Object.keys(symptomCounts);
+            const symptomData = Object.values(symptomCounts);
+            const ctxSymptom = document.getElementById('symptom-frequency-chart').getContext('2d');
+            dashboardCharts.symptom = new Chart(ctxSymptom, {
+                type: 'bar',
+                data: {
+                    labels: symptomLabels,
+                    datasets: [{
+                        label: 'Symptom Frequency',
+                        data: symptomData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Disease Trends (by month)
+            const trends = {};
+            records.forEach(r => {
+                const month = new Date(r.visitDate).toLocaleString('default', { month: 'short', year: 'numeric' });
+                trends[month] = (trends[month] || 0) + 1;
+            });
+            const trendLabels = Object.keys(trends);
+            const trendData = Object.values(trends);
+            const ctxTrends = document.getElementById('disease-trends-chart').getContext('2d');
+            dashboardCharts.trends = new Chart(ctxTrends, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'Disease Trends',
+                        data: trendData,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Healing Duration (average)
+            const avgHealing = records.length ? (records.reduce((sum, r) => sum + (r.healingDuration || 0), 0) / records.length) : 0;
+            const ctxHealing = document.getElementById('healing-duration-chart').getContext('2d');
+            dashboardCharts.healing = new Chart(ctxHealing, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Average Healing Duration'],
+                    datasets: [{
+                        data: [avgHealing],
+                        backgroundColor: ['rgba(255, 99, 132, 0.5)'],
+                        borderColor: ['rgba(255, 99, 132, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => `Average: ${ctx.raw.toFixed(1)} days` } }
+                    }
+                }
+            });
+
+            // Visit Frequency (per patient)
+            const visitCounts = {};
+            records.forEach(r => visitCounts[r.patientName] = (visitCounts[r.patientName] || 0) + 1);
+            const visitLabels = Object.keys(visitCounts);
+            const visitData = Object.values(visitCounts);
+            const ctxVisit = document.getElementById('visit-frequency-chart').getContext('2d');
+            dashboardCharts.visit = new Chart(ctxVisit, {
+                type: 'bar',
+                data: {
+                    labels: visitLabels,
+                    datasets: [{
+                        label: 'Visit Frequency',
+                        data: visitData,
+                        backgroundColor: 'rgba(153, 102, 255, 0.5)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Fees Analysis (per patient)
+            const fees = {};
+            records.forEach(r => fees[r.patientName] = (fees[r.patientName] || 0) + (r.fees || 0));
+            const feeLabels = Object.keys(fees);
+            const feeData = Object.values(fees);
+            const ctxFees = document.getElementById('fees-chart').getContext('2d');
+            dashboardCharts.fees = new Chart(ctxFees, {
+                type: 'pie',
+                data: {
+                    labels: feeLabels,
+                    datasets: [{
+                        data: feeData,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(153, 102, 255, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: { callbacks: { label: ctx => `$${ctx.raw}` } }
+                    }
+                }
+            });
+        }
+    </script>
+    <script src="js/Dashboard.js"></script>
+    <script src="js/SymptomAnalysis.js"></script>
+</body>
+
+</html>

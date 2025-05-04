@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor-Patient Management System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background-color: #0d6efd;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .section {
+            display: none;
+            padding: 2rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-group {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">Doctor-Patient Management</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#doctor-panel">Doctor Panel</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#patient-history">Patient History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#symptom-analysis">Symptom Analysis</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Doctor Panel Section -->
+        <section id="doctor-panel" class="section active">
+            <h2 class="mb-4">New Patient Record</h2>
+            <form id="patient-form" class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="patient-name" class="form-label">Patient Name</label>
+                        <input type="text" class="form-control" id="patient-name" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="contact-info" class="form-label">Contact Information</label>
+                        <input type="text" class="form-control" id="contact-info" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="visit-date" class="form-label">Date of Visit</label>
+                        <input type="date" class="form-control" id="visit-date" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="disease" class="form-label">Disease</label>
+                        <input type="text" class="form-control" id="disease" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="symptoms" class="form-label">Symptoms (Select multiple)</label>
+                    <select class="form-select" id="symptoms" multiple required>
+                        <option value="fever">Fever</option>
+                        <option value="cough">Cough</option>
+                        <option value="headache">Headache</option>
+                        <option value="fatigue">Fatigue</option>
+                        <option value="nausea">Nausea</option>
+                        <option value="pain">Pain</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="severity" class="form-label">Severity</label>
+                        <select class="form-select" id="severity" required>
+                            <option value="mild">Mild</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="severe">Severe</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="healing-duration" class="form-label">Healing Duration (days)</label>
+                        <input type="number" class="form-control" id="healing-duration" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="diagnosis" class="form-label">Diagnosis</label>
+                    <textarea class="form-control" id="diagnosis" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="treatment" class="form-label">Treatment</label>
+                    <textarea class="form-control" id="treatment" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="fees" class="form-label">Fees</label>
+                    <input type="number" class="form-control" id="fees" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Record</button>
+            </form>
+        </section>
+
+        <!-- Patient History Section -->
+        <section id="patient-history" class="section">
+            <h2 class="mb-4">Patient History</h2>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="search-input" placeholder="Search patients...">
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" id="date-filter">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-success export-btn" data-format="csv">Export to CSV</button>
+                <button class="btn btn-danger export-btn" data-format="pdf">Export to PDF</button>
+            </div>
+            <div id="patient-records" class="row"></div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section">
+            <h2 class="mb-4">Analytics Dashboard</h2>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <select class="form-select" id="disease-filter">
+                        <option value="">Filter by Disease</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="date" class="form-control" id="date-filter">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Symptom Frequency</h5>
+                            <canvas id="symptom-frequency-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Disease Trends</h5>
+                            <canvas id="disease-trends-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Healing Duration</h5>
+                            <canvas id="healing-duration-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Visit Frequency</h5>
+                            <canvas id="visit-frequency-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Fees Analysis</h5>
+                            <canvas id="fees-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Symptom Analysis Section -->
+        <section id="symptom-analysis" class="section">
+            <h2 class="mb-4">Symptom Pattern Analysis</h2>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="symptoms-input"
+                    placeholder="Enter symptoms separated by commas...">
+            </div>
+            <div id="analysis-result"></div>
+        </section>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/DoctorPanel.js"></script>
+    <script src="js/PatientHistory.js"></script>
+    <script src="js/Dashboard.js"></script>
+    <script src="js/SymptomAnalysis.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
